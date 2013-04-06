@@ -22,16 +22,35 @@ module Scraprr
       document.search(root_matcher).each do |node|
         skip = false
         item = {}
-        attributes.each do |(name, opts)|
-          value = node.search(opts[:matcher]).first.content
-          if sanitizers.has_key?(name)
+        attributes.each do |name, opts|
+          next unless opts.has_key?(:matcher)
+          element = node.search(opts[:matcher]).first
+          value = element ? element.content : nil
+          if sanitizers.has_key?(name) && value != nil
             value = sanitizers[name].call(value)
           end
-          if opts[:required] && (!value || value == "")
+          if opts[:required] && (value == nil || value == "")
             skip = true
             break
           end
           item[name] = value
+        end
+        attributes.each do |name, opts|
+          next unless opts.has_key?(:in)
+          match = opts[:regexp].match(item[opts[:in]])
+          value = match ? match[1] : nil
+          if sanitizers.has_key?(name) && value != nil
+            value = sanitizers[name].call(value)
+          end
+          if opts[:required] && (value == nil || value == "")
+            skip = true
+            break
+          end
+          item[name] = value
+        end
+        attributes.each do |name, opts|
+          next unless opts.has_key?(:composite)
+          item.delete(name)
         end
         items << item unless skip
       end

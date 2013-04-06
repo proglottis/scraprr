@@ -69,5 +69,76 @@ describe Scraprr::Scraper do
         @scraper.extract.length.must_equal 0
       end
     end
+
+    describe "HTML with composite columns" do
+      before do
+        html = """
+<html>
+  <head></head>
+  <body>
+    <table>
+      <tr><th>Beer</th><th>$</th></tr>
+      <tr><td>Beer1 - 5%, 330ml</td><td>10.0</td></tr>
+      <tr><td>Beer2 - 6%, 500ml</td><td>16.0</td></tr>
+      <tr><td>Beer3 - 10%, 375ml</td><td>20.0</td></tr>
+    </table>
+  </body>
+</html>
+        """
+        doc = Nokogiri::HTML(html)
+        @scraper = Scraprr::Scraper.new(doc)
+      end
+
+      it "finds each element at root matcher" do
+        @scraper.root_matcher = "table tr"
+        @scraper.extract.length.must_equal 4
+      end
+
+      it "finds hash of attributes" do
+        @scraper.root_matcher = "table tr"
+        @scraper.attribute(:name, :matcher => './td[1]')
+        @scraper.attribute(:price, :matcher => './td[2]')
+        results = @scraper.extract
+        results[0].must_equal({ :name => nil, :price => nil })
+        results[1].must_equal({ :name => 'Beer1 - 5%, 330ml', :price => '10.0' })
+        results[2].must_equal({ :name => 'Beer2 - 6%, 500ml', :price => '16.0' })
+        results[3].must_equal({ :name => 'Beer3 - 10%, 375ml', :price => '20.0' })
+      end
+
+      it "splits composite attributes" do
+        @scraper.root_matcher = "table tr"
+        @scraper.attribute(:data, :matcher => './td[1]', :composite => true)
+        @scraper.attribute(:name, :in => :data, :regexp => /^(.*) -.*$/)
+        @scraper.attribute(:abv, :in => :data, :regexp => /^.*- (.*),.*$/)
+        @scraper.attribute(:volume, :in => :data, :regexp => /^.*, (.*)$/)
+        results = @scraper.extract
+        results[0].must_equal({ :name => nil, :abv => nil, :volume => nil })
+        results[1].must_equal({ :name => 'Beer1', :abv => '5%', :volume => '330ml' })
+        results[2].must_equal({ :name => 'Beer2', :abv => '6%', :volume => '500ml' })
+        results[3].must_equal({ :name => 'Beer3', :abv => '10%', :volume => '375ml' })
+      end
+
+      it "skips when required composite attribute is blank" do
+        @scraper.root_matcher = "table tr"
+        @scraper.attribute(:data, :matcher => './td[1]', :composite => true)
+        @scraper.attribute(:name, :in => :data, :regexp => /^(.*) -.*$/, :required => true)
+        @scraper.extract.length.must_equal 3
+      end
+
+      it "uses sanitizer defined on composite attribute" do
+        @scraper.root_matcher = "table tr"
+        @scraper.attribute(:data, :matcher => './td[1]', :composite => true)
+        @scraper.attribute(:volume, :in => :data, :regexp => /^.*, (.*)$/)
+        @scraper.sanitizer(:volume) do |volume|
+          volume.strip.sub('ml', '').to_f
+        end
+        result = @scraper.extract
+        result[0].must_equal({ :volume => nil })
+        result[1].must_equal({ :volume => 330.0 })
+        result[2].must_equal({ :volume => 500.0 })
+        result[3].must_equal({ :volume => 375.0 })
+      end
+
+    end
   end
 end
