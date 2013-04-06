@@ -1,6 +1,6 @@
 # Scraprr
 
-TODO: Write a gem description
+Declarative HTML/XML scraper.
 
 ## Installation
 

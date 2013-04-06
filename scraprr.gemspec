@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Scraprr::VERSION
   spec.authors       = ["James Fargher"]
   spec.email         = ["proglottis@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{Extract structured data from HTML/XML files.}
+  spec.summary       = %q{Declarative HTML/XML scraper}
   spec.homepage      = ""
   spec.license       = "MIT"
 
