@@ -16,7 +16,7 @@ describe Scraprr::Scraper do
       <Volume>500ml</Volume>
     </Beer>
     <Beer>
-      <Name>Beer3</Name>
+      <Name></Name>
       <Volume>375ml</Volume>
     </Beer>
   </Beers>
@@ -34,17 +34,17 @@ describe Scraprr::Scraper do
 
       it "finds hash of attributes" do
         @scraper.root_matcher = "//Products/Beers/Beer"
-        @scraper.attribute(:name, "Name")
-        @scraper.attribute(:volume, "Volume")
+        @scraper.attribute(:name, :matcher => "Name")
+        @scraper.attribute(:volume, :matcher => "Volume")
         result = @scraper.extract
         result[0].must_equal({ :name => "Beer1", :volume => "330ml" })
         result[1].must_equal({ :name => "Beer2", :volume => "500ml" })
-        result[2].must_equal({ :name => "Beer3", :volume => "375ml" })
+        result[2].must_equal({ :name => "", :volume => "375ml" })
       end
 
       it "uses sanitizer defined on attribute" do
         @scraper.root_matcher = "//Products/Beers/Beer"
-        @scraper.attribute(:volume, "Volume")
+        @scraper.attribute(:volume, :matcher => "Volume")
         @scraper.sanitizer(:volume) do |volume|
           volume.strip.sub('ml', '').to_f
         end
@@ -52,6 +52,21 @@ describe Scraprr::Scraper do
         result[0].must_equal({ :volume => 330.0 })
         result[1].must_equal({ :volume => 500.0 })
         result[2].must_equal({ :volume => 375.0 })
+      end
+
+      it "skips when required attribute is blank" do
+        @scraper.root_matcher = "//Products/Beers/Beer"
+        @scraper.attribute(:name, :matcher => "Name", :required => true)
+        @scraper.extract.length.must_equal 2
+      end
+
+      it "skips when required attribute is blank after sanitizer" do
+        @scraper.root_matcher = "//Products/Beers/Beer"
+        @scraper.attribute(:name, :matcher => "Name", :required => true)
+        @scraper.sanitizer(:name) do |name|
+          ""
+        end
+        @scraper.extract.length.must_equal 0
       end
     end
   end
