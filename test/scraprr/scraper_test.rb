@@ -41,6 +41,18 @@ describe Scraprr::Scraper do
         result[1].must_equal({ :name => "Beer2", :volume => "500ml" })
         result[2].must_equal({ :name => "Beer3", :volume => "375ml" })
       end
+
+      it "uses sanitizer defined on attribute" do
+        @scraper.root_matcher = "//Products/Beers/Beer"
+        @scraper.attribute(:volume, "Volume")
+        @scraper.sanitizer(:volume) do |volume|
+          volume.strip.sub('ml', '').to_f
+        end
+        result = @scraper.extract
+        result[0].must_equal({ :volume => 330.0 })
+        result[1].must_equal({ :volume => 500.0 })
+        result[2].must_equal({ :volume => 375.0 })
+      end
     end
   end
 end
