@@ -78,9 +78,9 @@ describe Scraprr::Scraper do
   <body>
     <table>
       <tr><th>Beer</th><th>$</th></tr>
-      <tr><td>Beer1 - 5%, 330ml</td><td>10.0</td></tr>
-      <tr><td>Beer2 - 6%, 500ml</td><td>16.0</td></tr>
-      <tr><td>Beer3 - 10%, 375ml</td><td>20.0</td></tr>
+      <tr><td>Beer1 - 5%, 330ml</td><td>10.0<br></td></tr>
+      <tr><td>Beer2 - 6%, 500ml</td><td>16.0<br></td></tr>
+      <tr><td>Beer3 - 10%, 375ml</td><td>20.0<br></td></tr>
     </table>
   </body>
 </html>
@@ -99,10 +99,20 @@ describe Scraprr::Scraper do
         @scraper.attribute(:name, :matcher => './td[1]')
         @scraper.attribute(:price, :matcher => './td[2]')
         results = @scraper.extract
-        results[0].must_equal({ :name => nil, :price => nil })
+        results[0].must_equal({ :name => '', :price => '' })
         results[1].must_equal({ :name => 'Beer1 - 5%, 330ml', :price => '10.0' })
         results[2].must_equal({ :name => 'Beer2 - 6%, 500ml', :price => '16.0' })
         results[3].must_equal({ :name => 'Beer3 - 10%, 375ml', :price => '20.0' })
+      end
+
+      it "finds hash of attributes with HTML" do
+        @scraper.root_matcher = "table tr"
+        @scraper.attribute(:price, :matcher => './td[2]', :html => true)
+        results = @scraper.extract
+        results[0].must_equal({ :price => '' })
+        results[1].must_equal({ :price => '10.0<br>' })
+        results[2].must_equal({ :price => '16.0<br>' })
+        results[3].must_equal({ :price => '20.0<br>' })
       end
 
       it "splits composite attributes" do

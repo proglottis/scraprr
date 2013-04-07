@@ -24,8 +24,8 @@ module Scraprr
         item = {}
         attributes.each do |name, opts|
           next unless opts.has_key?(:matcher)
-          element = node.search(opts[:matcher]).first
-          value = element ? element.content : nil
+          element = node.search(opts[:matcher])
+          value = opts[:html] ?  element.inner_html : element.inner_text
           if sanitizers.has_key?(name) && value != nil
             value = sanitizers[name].call(value)
           end
