@@ -1,7 +1,6 @@
 module Scraprr
   class Scraper
-    attr_reader :document, :attributes, :sanitizers
-    attr_accessor :root_matcher
+    attr_reader :document, :root_matcher, :attributes, :sanitizers
 
     def initialize(document)
       @document = document
@@ -9,12 +8,19 @@ module Scraprr
       @sanitizers = {}
     end
 
+    def root(matcher)
+      @root_matcher = matcher
+      self
+    end
+
     def attribute(name, opts={})
       @attributes[name] = opts
+      self
     end
 
     def sanitizer(name, &block)
       @sanitizers[name] = block
+      self
     end
 
     def extract

@@ -27,13 +27,13 @@ describe Scraprr::Scraper do
       end
 
       it "finds each element at root matcher" do
-        @scraper.root_matcher = "//Products/Beers/Beer"
+        @scraper.root "//Products/Beers/Beer"
         result = @scraper.extract
         result.length.must_equal 3
       end
 
       it "finds hash of attributes" do
-        @scraper.root_matcher = "//Products/Beers/Beer"
+        @scraper.root "//Products/Beers/Beer"
         @scraper.attribute(:name, :matcher => "Name")
         @scraper.attribute(:volume, :matcher => "Volume")
         result = @scraper.extract
@@ -43,7 +43,7 @@ describe Scraprr::Scraper do
       end
 
       it "uses sanitizer defined on attribute" do
-        @scraper.root_matcher = "//Products/Beers/Beer"
+        @scraper.root "//Products/Beers/Beer"
         @scraper.attribute(:volume, :matcher => "Volume")
         @scraper.sanitizer(:volume) do |volume|
           volume.strip.sub('ml', '').to_f
@@ -55,13 +55,13 @@ describe Scraprr::Scraper do
       end
 
       it "skips when required attribute is blank" do
-        @scraper.root_matcher = "//Products/Beers/Beer"
+        @scraper.root "//Products/Beers/Beer"
         @scraper.attribute(:name, :matcher => "Name", :required => true)
         @scraper.extract.length.must_equal 2
       end
 
       it "skips when required attribute is blank after sanitizer" do
-        @scraper.root_matcher = "//Products/Beers/Beer"
+        @scraper.root "//Products/Beers/Beer"
         @scraper.attribute(:name, :matcher => "Name", :required => true)
         @scraper.sanitizer(:name) do |name|
           ""
@@ -90,12 +90,12 @@ describe Scraprr::Scraper do
       end
 
       it "finds each element at root matcher" do
-        @scraper.root_matcher = "table tr"
+        @scraper.root "table tr"
         @scraper.extract.length.must_equal 4
       end
 
       it "finds hash of attributes" do
-        @scraper.root_matcher = "table tr"
+        @scraper.root "table tr"
         @scraper.attribute(:name, :matcher => './td[1]')
         @scraper.attribute(:price, :matcher => './td[2]')
         results = @scraper.extract
@@ -106,7 +106,7 @@ describe Scraprr::Scraper do
       end
 
       it "finds hash of attributes with HTML" do
-        @scraper.root_matcher = "table tr"
+        @scraper.root "table tr"
         @scraper.attribute(:price, :matcher => './td[2]', :html => true)
         results = @scraper.extract
         results[0].must_equal({ :price => '' })
@@ -116,7 +116,7 @@ describe Scraprr::Scraper do
       end
 
       it "splits composite attributes" do
-        @scraper.root_matcher = "table tr"
+        @scraper.root "table tr"
         @scraper.attribute(:data, :matcher => './td[1]', :composite => true)
         @scraper.attribute(:name, :in => :data, :regexp => /^(.*) -.*$/)
         @scraper.attribute(:abv, :in => :data, :regexp => /^.*- (.*),.*$/)
@@ -129,14 +129,14 @@ describe Scraprr::Scraper do
       end
 
       it "skips when required composite attribute is blank" do
-        @scraper.root_matcher = "table tr"
+        @scraper.root "table tr"
         @scraper.attribute(:data, :matcher => './td[1]', :composite => true)
         @scraper.attribute(:name, :in => :data, :regexp => /^(.*) -.*$/, :required => true)
         @scraper.extract.length.must_equal 3
       end
 
       it "uses sanitizer defined on composite attribute" do
-        @scraper.root_matcher = "table tr"
+        @scraper.root "table tr"
         @scraper.attribute(:data, :matcher => './td[1]', :composite => true)
         @scraper.attribute(:volume, :in => :data, :regexp => /^.*, (.*)$/)
         @scraper.sanitizer(:volume) do |volume|
