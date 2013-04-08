@@ -42,31 +42,10 @@ describe Scraprr::Scraper do
         result[2].must_equal({ :name => "", :volume => "375ml" })
       end
 
-      it "uses sanitizer defined on attribute" do
-        @scraper.root "//Products/Beers/Beer"
-        @scraper.attribute(:volume, :matcher => "Volume")
-        @scraper.sanitizer(:volume) do |volume|
-          volume.strip.sub('ml', '').to_f
-        end
-        result = @scraper.extract
-        result[0].must_equal({ :volume => 330.0 })
-        result[1].must_equal({ :volume => 500.0 })
-        result[2].must_equal({ :volume => 375.0 })
-      end
-
       it "skips when required attribute is blank" do
         @scraper.root "//Products/Beers/Beer"
         @scraper.attribute(:name, :matcher => "Name", :required => true)
         @scraper.extract.length.must_equal 2
-      end
-
-      it "skips when required attribute is blank after sanitizer" do
-        @scraper.root "//Products/Beers/Beer"
-        @scraper.attribute(:name, :matcher => "Name", :required => true)
-        @scraper.sanitizer(:name) do |name|
-          ""
-        end
-        @scraper.extract.length.must_equal 0
       end
     end
 
@@ -115,12 +94,11 @@ describe Scraprr::Scraper do
         results[3].must_equal({ :price => '20.0<br>' })
       end
 
-      it "splits composite attributes" do
-        @scraper.root "table tr"
-        @scraper.attribute(:data, :matcher => './td[1]', :composite => true)
-        @scraper.attribute(:name, :in => :data, :regexp => /^(.*) -.*$/)
-        @scraper.attribute(:abv, :in => :data, :regexp => /^.*- (.*),.*$/)
-        @scraper.attribute(:volume, :in => :data, :regexp => /^.*, (.*)$/)
+      it "finds attributes based on regexp" do
+        @scraper.root("table tr").
+          attribute(:name,   :matcher => './td[1]', :regexp => /^(.*) -.*$/).
+          attribute(:abv,    :matcher => './td[1]', :regexp => /^.*- (.*),.*$/).
+          attribute(:volume, :matcher => './td[1]', :regexp => /^.*, (.*)$/)
         results = @scraper.extract
         results[0].must_equal({ :name => nil, :abv => nil, :volume => nil })
         results[1].must_equal({ :name => 'Beer1', :abv => '5%', :volume => '330ml' })
@@ -128,25 +106,14 @@ describe Scraprr::Scraper do
         results[3].must_equal({ :name => 'Beer3', :abv => '10%', :volume => '375ml' })
       end
 
-      it "skips when required composite attribute is blank" do
-        @scraper.root "table tr"
-        @scraper.attribute(:data, :matcher => './td[1]', :composite => true)
-        @scraper.attribute(:name, :in => :data, :regexp => /^(.*) -.*$/, :required => true)
-        @scraper.extract.length.must_equal 3
-      end
-
-      it "uses sanitizer defined on composite attribute" do
-        @scraper.root "table tr"
-        @scraper.attribute(:data, :matcher => './td[1]', :composite => true)
-        @scraper.attribute(:volume, :in => :data, :regexp => /^.*, (.*)$/)
-        @scraper.sanitizer(:volume) do |volume|
-          volume.strip.sub('ml', '').to_f
-        end
-        result = @scraper.extract
-        result[0].must_equal({ :volume => nil })
-        result[1].must_equal({ :volume => 330.0 })
-        result[2].must_equal({ :volume => 500.0 })
-        result[3].must_equal({ :volume => 375.0 })
+      it "finds attributes based on regexp with HTML" do
+        @scraper.root("table tr").
+          attribute(:price, :matcher => './td[2]', :html => true, :regexp => /([0-9\.]+)/)
+        results = @scraper.extract
+        results[0].must_equal({ :price => nil })
+        results[1].must_equal({ :price => '10.0' })
+        results[2].must_equal({ :price => '16.0' })
+        results[3].must_equal({ :price => '20.0' })
       end
 
     end
