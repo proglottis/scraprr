@@ -26,15 +26,15 @@ describe Scraprr::Scraper do
         @scraper = Scraprr::Scraper.new('//Products/Beers/Beer')
       end
 
-      it "finds each element at root matcher" do
+      it "finds each element at root path" do
         result = @scraper.extract(@document)
         result.length.must_equal 3
       end
 
       it "finds hash of attributes" do
         @scraper.
-          attribute(:name, :matcher => "Name").
-          attribute(:volume, :matcher => "Volume")
+          attribute(:name, :path => "Name").
+          attribute(:volume, :path => "Volume")
         result = @scraper.extract(@document)
         result[0].must_equal({ :name => "Beer1", :volume => "330ml" })
         result[1].must_equal({ :name => "Beer2", :volume => "500ml" })
@@ -42,7 +42,7 @@ describe Scraprr::Scraper do
       end
 
       it "skips when required attribute is blank" do
-        @scraper.attribute(:name, :matcher => "Name", :required => true)
+        @scraper.attribute(:name, :path => "Name", :required => true)
         @scraper.extract(@document).length.must_equal 2
       end
     end
@@ -66,14 +66,14 @@ describe Scraprr::Scraper do
         @scraper = Scraprr::Scraper.new("table tr")
       end
 
-      it "finds each element at root matcher" do
+      it "finds each element at root path" do
         @scraper.extract(@document).length.must_equal 4
       end
 
       it "finds hash of attributes" do
         @scraper.
-          attribute(:name, :matcher => './td[1]').
-          attribute(:price, :matcher => './td[2]')
+          attribute(:name, :path => './td[1]').
+          attribute(:price, :path => './td[2]')
         results = @scraper.extract(@document)
         results[0].must_equal({ :name => '', :price => '' })
         results[1].must_equal({ :name => 'Beer1 - 5%, 330ml', :price => '10.0' })
@@ -82,7 +82,7 @@ describe Scraprr::Scraper do
       end
 
       it "finds hash of attributes with HTML" do
-        @scraper.attribute(:price, :matcher => './td[2]', :html => true)
+        @scraper.attribute(:price, :path => './td[2]', :html => true)
         results = @scraper.extract(@document)
         results[0].must_equal({ :price => '' })
         results[1].must_equal({ :price => '10.0<br>' })
@@ -92,9 +92,9 @@ describe Scraprr::Scraper do
 
       it "finds attributes based on regexp" do
         @scraper.
-          attribute(:name,   :matcher => './td[1]', :regexp => /^(.*) -.*$/).
-          attribute(:abv,    :matcher => './td[1]', :regexp => /^.*- (.*),.*$/).
-          attribute(:volume, :matcher => './td[1]', :regexp => /^.*, (.*)$/)
+          attribute(:name,   :path => './td[1]', :regexp => /^(.*) -.*$/).
+          attribute(:abv,    :path => './td[1]', :regexp => /^.*- (.*),.*$/).
+          attribute(:volume, :path => './td[1]', :regexp => /^.*, (.*)$/)
         results = @scraper.extract(@document)
         results[0].must_equal({ :name => nil, :abv => nil, :volume => nil })
         results[1].must_equal({ :name => 'Beer1', :abv => '5%', :volume => '330ml' })
@@ -103,7 +103,7 @@ describe Scraprr::Scraper do
       end
 
       it "finds attributes based on regexp with HTML" do
-        @scraper. attribute(:price, :matcher => './td[2]', :html => true, :regexp => /([0-9\.]+)/)
+        @scraper. attribute(:price, :path => './td[2]', :html => true, :regexp => /([0-9\.]+)/)
         results = @scraper.extract(@document)
         results[0].must_equal({ :price => nil })
         results[1].must_equal({ :price => '10.0' })

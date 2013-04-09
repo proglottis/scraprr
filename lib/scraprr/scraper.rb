@@ -1,14 +1,14 @@
 module Scraprr
   class Scraper
-    attr_reader :root_matcher, :attributes
+    attr_reader :root_path, :attributes
 
-    def initialize(root_matcher = '/')
-      @root_matcher = root_matcher
+    def initialize(root_path = '/')
+      @root_path = root_path
       @attributes = {}
     end
 
-    def root(matcher)
-      @root_matcher = matcher
+    def root(path)
+      @root_path = path
       self
     end
 
@@ -19,7 +19,7 @@ module Scraprr
 
     def extract(document)
       items = []
-      document.search(root_matcher).each do |node|
+      document.search(root_path).each do |node|
         item = extract_item(node)
         items << item unless item[:_skip]
       end
@@ -31,7 +31,7 @@ module Scraprr
     def extract_item(node)
       item = {}
       attributes.each do |name, opts|
-        element = node.search(opts[:matcher])
+        element = node.search(opts[:path])
         value = opts[:html] ?  element.inner_html : element.inner_text
         if opts.has_key?(:regexp)
           match = opts[:regexp].match(value)
