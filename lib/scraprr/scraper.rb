@@ -31,7 +31,6 @@ module Scraprr
     def extract_item(node)
       item = {}
       attributes.each do |name, opts|
-        next unless opts.has_key?(:matcher)
         element = node.search(opts[:matcher])
         value = opts[:html] ?  element.inner_html : element.inner_text
         if opts.has_key?(:regexp)
