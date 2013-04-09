@@ -1,11 +1,10 @@
 module Scraprr
   class Scraper
-    attr_reader :document, :root_matcher, :attributes, :sanitizers
+    attr_reader :root_matcher, :attributes
 
-    def initialize(document)
-      @document = document
+    def initialize(root_matcher = '/')
+      @root_matcher = root_matcher
       @attributes = {}
-      @sanitizers = {}
     end
 
     def root(matcher)
@@ -18,7 +17,7 @@ module Scraprr
       self
     end
 
-    def extract
+    def extract(document)
       items = []
       document.search(root_matcher).each do |node|
         item = extract_item(node)

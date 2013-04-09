@@ -22,30 +22,28 @@ describe Scraprr::Scraper do
   </Beers>
 </Products>
         """
-        doc = Nokogiri::XML(xml)
-        @scraper = Scraprr::Scraper.new(doc)
+        @document = Nokogiri::XML(xml)
+        @scraper = Scraprr::Scraper.new('//Products/Beers/Beer')
       end
 
       it "finds each element at root matcher" do
-        @scraper.root "//Products/Beers/Beer"
-        result = @scraper.extract
+        result = @scraper.extract(@document)
         result.length.must_equal 3
       end
 
       it "finds hash of attributes" do
-        @scraper.root "//Products/Beers/Beer"
-        @scraper.attribute(:name, :matcher => "Name")
-        @scraper.attribute(:volume, :matcher => "Volume")
-        result = @scraper.extract
+        @scraper.
+          attribute(:name, :matcher => "Name").
+          attribute(:volume, :matcher => "Volume")
+        result = @scraper.extract(@document)
         result[0].must_equal({ :name => "Beer1", :volume => "330ml" })
         result[1].must_equal({ :name => "Beer2", :volume => "500ml" })
         result[2].must_equal({ :name => "", :volume => "375ml" })
       end
 
       it "skips when required attribute is blank" do
-        @scraper.root "//Products/Beers/Beer"
         @scraper.attribute(:name, :matcher => "Name", :required => true)
-        @scraper.extract.length.must_equal 2
+        @scraper.extract(@document).length.must_equal 2
       end
     end
 
@@ -64,20 +62,19 @@ describe Scraprr::Scraper do
   </body>
 </html>
         """
-        doc = Nokogiri::HTML(html)
-        @scraper = Scraprr::Scraper.new(doc)
+        @document = Nokogiri::HTML(html)
+        @scraper = Scraprr::Scraper.new("table tr")
       end
 
       it "finds each element at root matcher" do
-        @scraper.root "table tr"
-        @scraper.extract.length.must_equal 4
+        @scraper.extract(@document).length.must_equal 4
       end
 
       it "finds hash of attributes" do
-        @scraper.root "table tr"
-        @scraper.attribute(:name, :matcher => './td[1]')
-        @scraper.attribute(:price, :matcher => './td[2]')
-        results = @scraper.extract
+        @scraper.
+          attribute(:name, :matcher => './td[1]').
+          attribute(:price, :matcher => './td[2]')
+        results = @scraper.extract(@document)
         results[0].must_equal({ :name => '', :price => '' })
         results[1].must_equal({ :name => 'Beer1 - 5%, 330ml', :price => '10.0' })
         results[2].must_equal({ :name => 'Beer2 - 6%, 500ml', :price => '16.0' })
@@ -85,9 +82,8 @@ describe Scraprr::Scraper do
       end
 
       it "finds hash of attributes with HTML" do
-        @scraper.root "table tr"
         @scraper.attribute(:price, :matcher => './td[2]', :html => true)
-        results = @scraper.extract
+        results = @scraper.extract(@document)
         results[0].must_equal({ :price => '' })
         results[1].must_equal({ :price => '10.0<br>' })
         results[2].must_equal({ :price => '16.0<br>' })
@@ -95,11 +91,11 @@ describe Scraprr::Scraper do
       end
 
       it "finds attributes based on regexp" do
-        @scraper.root("table tr").
+        @scraper.
           attribute(:name,   :matcher => './td[1]', :regexp => /^(.*) -.*$/).
           attribute(:abv,    :matcher => './td[1]', :regexp => /^.*- (.*),.*$/).
           attribute(:volume, :matcher => './td[1]', :regexp => /^.*, (.*)$/)
-        results = @scraper.extract
+        results = @scraper.extract(@document)
         results[0].must_equal({ :name => nil, :abv => nil, :volume => nil })
         results[1].must_equal({ :name => 'Beer1', :abv => '5%', :volume => '330ml' })
         results[2].must_equal({ :name => 'Beer2', :abv => '6%', :volume => '500ml' })
@@ -107,9 +103,8 @@ describe Scraprr::Scraper do
       end
 
       it "finds attributes based on regexp with HTML" do
-        @scraper.root("table tr").
-          attribute(:price, :matcher => './td[2]', :html => true, :regexp => /([0-9\.]+)/)
-        results = @scraper.extract
+        @scraper. attribute(:price, :matcher => './td[2]', :html => true, :regexp => /([0-9\.]+)/)
+        results = @scraper.extract(@document)
         results[0].must_equal({ :price => nil })
         results[1].must_equal({ :price => '10.0' })
         results[2].must_equal({ :price => '16.0' })
