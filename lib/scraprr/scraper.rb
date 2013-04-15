@@ -1,10 +1,10 @@
 module Scraprr
   class Scraper
-    attr_reader :root_path, :attributes
+    attr_reader :root_path, :object_scraper
 
     def initialize(root_path = '/')
       @root_path = root_path
-      @attributes = {}
+      @object_scraper = ObjectScraper.new
     end
 
     def root(path)
@@ -13,34 +13,18 @@ module Scraprr
     end
 
     def attribute(name, opts={})
-      @attributes[name] = opts
+      @object_scraper.attribute(name, opts)
       self
     end
 
     def extract(document)
       items = []
       document.search(root_path).each do |node|
-        item = extract_item(node)
-        items << item unless item[:_skip]
+        item = @object_scraper.extract(node)
+        items << item if item != nil
       end
       items
     end
 
-    private
-
-    def extract_item(node)
-      item = {}
-      attributes.each do |name, opts|
-        element = node.search(opts[:path])
-        value = opts[:html] ?  element.inner_html : element.inner_text
-        if opts.has_key?(:regexp)
-          match = opts[:regexp].match(value)
-          value = match ? match[1] : nil
-        end
-        item[name] = value
-        item[:_skip] = true if opts[:required] && (value == nil || value == "")
-      end
-      item
-    end
   end
 end

@@ -2,27 +2,9 @@ require 'test_helper'
 
 describe Scraprr::Scraper do
   describe "#extract" do
-    describe "trivial XML" do
+    describe "XML document" do
       before do
-        xml = """
-<Products>
-  <Beers>
-    <Beer>
-      <Name>Beer1</Name>
-      <Volume>330ml</Volume>
-    </Beer>
-    <Beer>
-      <Name>Beer2</Name>
-      <Volume>500ml</Volume>
-    </Beer>
-    <Beer>
-      <Name></Name>
-      <Volume>375ml</Volume>
-    </Beer>
-  </Beers>
-</Products>
-        """
-        @document = Nokogiri::XML(xml)
+        @document = xml_trivial
         @scraper = Scraprr::Scraper.new('//Products/Beers/Beer')
       end
 
@@ -40,29 +22,11 @@ describe Scraprr::Scraper do
         result[1].must_equal({ :name => "Beer2", :volume => "500ml" })
         result[2].must_equal({ :name => "", :volume => "375ml" })
       end
-
-      it "skips when required attribute is blank" do
-        @scraper.attribute(:name, :path => "Name", :required => true)
-        @scraper.extract(@document).length.must_equal 2
-      end
     end
 
-    describe "HTML with composite columns" do
+    describe "HTML document" do
       before do
-        html = """
-<html>
-  <head></head>
-  <body>
-    <table>
-      <tr><th>Beer</th><th>$</th></tr>
-      <tr><td>Beer1 - 5%, 330ml</td><td>10.0<br></td></tr>
-      <tr><td>Beer2 - 6%, 500ml</td><td>16.0<br></td></tr>
-      <tr><td>Beer3 - 10%, 375ml</td><td>20.0<br></td></tr>
-    </table>
-  </body>
-</html>
-        """
-        @document = Nokogiri::HTML(html)
+        @document = html_composite
         @scraper = Scraprr::Scraper.new("table tr")
       end
 
@@ -80,37 +44,6 @@ describe Scraprr::Scraper do
         results[2].must_equal({ :name => 'Beer2 - 6%, 500ml', :price => '16.0' })
         results[3].must_equal({ :name => 'Beer3 - 10%, 375ml', :price => '20.0' })
       end
-
-      it "finds hash of attributes with HTML" do
-        @scraper.attribute(:price, :path => './td[2]', :html => true)
-        results = @scraper.extract(@document)
-        results[0].must_equal({ :price => '' })
-        results[1].must_equal({ :price => '10.0<br>' })
-        results[2].must_equal({ :price => '16.0<br>' })
-        results[3].must_equal({ :price => '20.0<br>' })
-      end
-
-      it "finds attributes based on regexp" do
-        @scraper.
-          attribute(:name,   :path => './td[1]', :regexp => /^(.*) -.*$/).
-          attribute(:abv,    :path => './td[1]', :regexp => /^.*- (.*),.*$/).
-          attribute(:volume, :path => './td[1]', :regexp => /^.*, (.*)$/)
-        results = @scraper.extract(@document)
-        results[0].must_equal({ :name => nil, :abv => nil, :volume => nil })
-        results[1].must_equal({ :name => 'Beer1', :abv => '5%', :volume => '330ml' })
-        results[2].must_equal({ :name => 'Beer2', :abv => '6%', :volume => '500ml' })
-        results[3].must_equal({ :name => 'Beer3', :abv => '10%', :volume => '375ml' })
-      end
-
-      it "finds attributes based on regexp with HTML" do
-        @scraper. attribute(:price, :path => './td[2]', :html => true, :regexp => /([0-9\.]+)/)
-        results = @scraper.extract(@document)
-        results[0].must_equal({ :price => nil })
-        results[1].must_equal({ :price => '10.0' })
-        results[2].must_equal({ :price => '16.0' })
-        results[3].must_equal({ :price => '20.0' })
-      end
-
     end
   end
 end
