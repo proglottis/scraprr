@@ -18,6 +18,22 @@ describe Scraprr::AttributeScraper do
       end
     end
 
+    describe ":attr" do
+      it "returns value in attribute at path" do
+        node = xml_trivial.search('//Products/Beers/Beer')[0]
+        value = Scraprr::AttributeScraper.new(:name, :path => ".", :attr => "region").
+          extract(node)
+        value.must_equal "New Zealand"
+      end
+
+      it "returns empty in missing attribute at path" do
+        node = xml_trivial.search('//Products/Beers/Beer')[0]
+        value = Scraprr::AttributeScraper.new(:name, :path => "Name", :attr => "something").
+          extract(node)
+        value.must_equal ""
+      end
+    end
+
     describe ":required" do
       it "raises if required attribute is blank" do
         node = xml_trivial.search('//Products/Beers/Beer').last

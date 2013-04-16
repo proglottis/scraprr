@@ -5,7 +5,7 @@ def xml_trivial
   xml = <<-EOF
   <Products>
     <Beers>
-      <Beer>
+      <Beer region="New Zealand">
         <Name>Beer1</Name>
         <Volume>330ml</Volume>
       </Beer>
