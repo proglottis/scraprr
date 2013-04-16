@@ -10,7 +10,7 @@ describe Scraprr::Scraper do
 
       it "finds each element at root path" do
         result = @scraper.extract(@document)
-        result.length.must_equal 3
+        result.length.must_equal @document.search('//Products/Beers/Beer').length
       end
 
       it "finds hash of attributes" do
@@ -20,7 +20,8 @@ describe Scraprr::Scraper do
         result = @scraper.extract(@document)
         result[0].must_equal({ :name => "Beer1", :volume => "330ml" })
         result[1].must_equal({ :name => "Beer2", :volume => "500ml" })
-        result[2].must_equal({ :name => "", :volume => "375ml" })
+        result[2].must_equal({ :name => "  Beer3  ", :volume => "  440ml  " })
+        result[3].must_equal({ :name => "", :volume => "375ml" })
       end
 
       it "skips item when required attribute is empty" do
@@ -30,7 +31,7 @@ describe Scraprr::Scraper do
         result = @scraper.extract(@document)
         result[0].must_equal({ :name => "Beer1", :volume => "330ml" })
         result[1].must_equal({ :name => "Beer2", :volume => "500ml" })
-        result.length.must_equal 2
+        result.length.must_equal @document.search('//Products/Beers/Beer').length - 1
       end
     end
 

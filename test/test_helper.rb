@@ -14,6 +14,10 @@ def xml_trivial
         <Volume>500ml</Volume>
       </Beer>
       <Beer>
+        <Name>  Beer3  </Name>
+        <Volume>  440ml  </Volume>
+      </Beer>
+      <Beer>
         <Name></Name>
         <Volume>375ml</Volume>
       </Beer>

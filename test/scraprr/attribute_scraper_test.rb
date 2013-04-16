@@ -75,5 +75,14 @@ describe Scraprr::AttributeScraper do
         result.must_equal '10.0'
       end
     end
+
+    describe ":strip" do
+      it "returns value stripped of trailing and leading whitespace" do
+        node = xml_trivial.search('//Products/Beers/Beer')[2]
+        value = Scraprr::AttributeScraper.new(:name, :path => "Name", :strip => true).
+          extract(node)
+        value.must_equal 'Beer3'
+      end
+    end
   end
 end
