@@ -1,5 +1,6 @@
 require "nokogiri"
 require "scraprr/version"
+require "scraprr/attribute_scraper"
 require "scraprr/object_scraper"
 require "scraprr/scraper"
 
