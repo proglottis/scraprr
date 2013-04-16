@@ -6,7 +6,7 @@ module Scraprr
 
     def initialize(name, opts = {})
       @name = name
-      @path = opts[:path] || '/'
+      @path = opts[:path] || '.'
       @attr = opts[:attr]
       @required = opts[:required]
       @html = opts[:html]
