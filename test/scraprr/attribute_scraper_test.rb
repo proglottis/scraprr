@@ -5,14 +5,14 @@ describe Scraprr::AttributeScraper do
     describe ":path" do
       it "returns value at path in XML" do
         node = xml_trivial.search('//Products/Beers/Beer')[0]
-        value = Scraprr::AttributeScraper.new(:path => "Name").
+        value = Scraprr::AttributeScraper.new(:name, :path => "Name").
           extract(node)
         value.must_equal "Beer1"
       end
 
       it "returns value at path in HTML" do
         node = html_composite.search('table tr')[1]
-        value = Scraprr::AttributeScraper.new(:path => './td[2]').
+        value = Scraprr::AttributeScraper.new(:price, :path => './td[2]').
           extract(node)
         value.must_equal '10.0'
       end
@@ -22,7 +22,7 @@ describe Scraprr::AttributeScraper do
       it "raises if required attribute is blank" do
         node = xml_trivial.search('//Products/Beers/Beer').last
         proc {
-          Scraprr::AttributeScraper.new(:path => "Name", :required => true).
+          Scraprr::AttributeScraper.new(:name, :path => "Name", :required => true).
             extract(node)
         }.must_raise(Scraprr::MissingAttributeError)
       end
@@ -31,7 +31,7 @@ describe Scraprr::AttributeScraper do
     describe ":html" do
       it "returns value at path including HTML" do
         node = html_composite.search('table tr')[1]
-        value = Scraprr::AttributeScraper.new(
+        value = Scraprr::AttributeScraper.new(:price,
           :path => './td[2]',
           :html => true
         ).extract(node)
@@ -42,7 +42,7 @@ describe Scraprr::AttributeScraper do
     describe ":regexp" do
       it "returns value that matches regexp" do
         node = html_composite.search('table tr')[1]
-        value = Scraprr::AttributeScraper.new(
+        value = Scraprr::AttributeScraper.new(:name,
           :path => './td[1]',
           :regexp => /^(.*) -.*$/
         ).extract(node)
@@ -51,7 +51,7 @@ describe Scraprr::AttributeScraper do
 
       it "returns value including HTML that matches regexp" do
         node = html_composite.search('table tr')[1]
-        result = Scraprr::AttributeScraper.new(
+        result = Scraprr::AttributeScraper.new(:price,
           :path => './td[2]',
           :html => true,
           :regexp => /([0-9\.]+)/

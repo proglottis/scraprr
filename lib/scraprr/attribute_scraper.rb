@@ -2,9 +2,10 @@ module Scraprr
   class MissingAttributeError < StandardError; end
 
   class AttributeScraper
-    attr_reader :path, :required, :html, :regexp
+    attr_reader :name, :path, :required, :html, :regexp
 
-    def initialize(opts = {})
+    def initialize(name, opts = {})
+      @name = name
       @path = opts[:path] || '/'
       @required = opts[:required]
       @html = opts[:html]
@@ -19,9 +20,17 @@ module Scraprr
         value = match ? match[1] : nil
       end
       if required && (value == nil || value == '')
-        raise MissingAttributeError.new 'has empty value'
+        raise MissingAttributeError.new "#{name} has empty value"
       end
       value
+    end
+
+    def eql?(other)
+      name.eql?(other.name)
+    end
+
+    def hash
+      name.hash
     end
   end
 end

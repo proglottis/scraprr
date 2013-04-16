@@ -20,12 +20,13 @@ describe Scraprr::ObjectScraper do
       result.must_equal({ :name => 'Beer1 - 5%, 330ml', :price => '10.0'})
     end
 
-    it "returns nil if required attribute is blank" do
+    it "raises if required attribute is blank" do
       node = xml_trivial.search('//Products/Beers/Beer').last
-      result = Scraprr::ObjectScraper.new.
-        attribute(:name, :path => "Name", :required => true).
-        extract(node)
-      result.must_equal nil
+      proc {
+        Scraprr::ObjectScraper.new.
+          attribute(:name, :path => "Name", :required => true).
+          extract(node)
+      }.must_raise(Scraprr::MissingAttributeError)
     end
   end
 end

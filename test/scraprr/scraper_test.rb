@@ -22,6 +22,16 @@ describe Scraprr::Scraper do
         result[1].must_equal({ :name => "Beer2", :volume => "500ml" })
         result[2].must_equal({ :name => "", :volume => "375ml" })
       end
+
+      it "skips item when required attribute is empty" do
+        @scraper.
+          attribute(:name, :path => "Name", :required => true).
+          attribute(:volume, :path => "Volume")
+        result = @scraper.extract(@document)
+        result[0].must_equal({ :name => "Beer1", :volume => "330ml" })
+        result[1].must_equal({ :name => "Beer2", :volume => "500ml" })
+        result.length.must_equal 2
+      end
     end
 
     describe "HTML document" do

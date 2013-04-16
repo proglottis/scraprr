@@ -3,21 +3,20 @@ module Scraprr
     attr_reader :attributes
 
     def initialize
-      @attributes = {}
+      @attributes = Set.new
     end
 
     def attribute(name, opts={})
-      @attributes[name] = AttributeScraper.new(opts)
+      @attributes.add(AttributeScraper.new(name, opts))
       self
     end
 
     def extract(node)
-      attributes.reduce({}) do |item, (name, attribute_scraper)|
-        item[name] = attribute_scraper.extract(node)
+      attributes.reduce({}) do |item, attribute_scraper|
+        item[attribute_scraper.name] = attribute_scraper.extract(node)
         item
       end
-    rescue MissingAttributeError
-      nil
     end
+
   end
 end
