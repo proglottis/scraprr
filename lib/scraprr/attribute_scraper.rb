@@ -17,22 +17,7 @@ module Scraprr
     end
 
     def extract(element)
-      if attr
-        value = element.attr(attr).to_s
-      else
-        value = html ?  element.inner_html : element.inner_text
-      end
-      if regexp
-        match = regexp.match(value)
-        value = match ? match[1] : nil
-      end
-      if strip
-        value = value.strip
-      end
-      if required && (value == nil || value == '')
-        raise MissingAttributeError.new "#{name} has empty value"
-      end
-      value
+      require_value(strip_value(regexp_value(extract_value(element))))
     end
 
     def eql?(other)
@@ -41,6 +26,40 @@ module Scraprr
 
     def hash
       name.hash
+    end
+
+    private
+
+    def extract_value(element)
+      if attr
+        element.attr(attr).to_s
+      else
+        if html
+          element.inner_html
+        else
+          element.inner_text
+        end
+      end
+    end
+
+    def regexp_value(value)
+      return value unless regexp
+      match = regexp.match(value)
+      if match
+        match[1]
+      end
+    end
+
+    def strip_value(value)
+      return value unless strip
+      value.strip
+    end
+
+    def require_value(value)
+      if required && (value == nil || value == '')
+        raise MissingAttributeError.new "#{name} has empty value"
+      end
+      value
     end
   end
 end
