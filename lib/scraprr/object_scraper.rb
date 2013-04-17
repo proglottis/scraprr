@@ -6,14 +6,15 @@ module Scraprr
       @attributes = Set.new
     end
 
-    def attribute(name, opts={})
-      @attributes.add(AttributeScraper.new(name, opts))
+    def attribute(name, path=AttributeScraper::DEFAULT_PATH, opts={})
+      @attributes.add(AttributeScraper.new(name, path, opts))
       self
     end
 
     def extract(node)
       attributes.reduce({}) do |item, attribute_scraper|
-        item[attribute_scraper.name] = attribute_scraper.extract(node)
+        element = node.search(attribute_scraper.path)
+        item[attribute_scraper.name] = attribute_scraper.extract(element)
         item
       end
     end

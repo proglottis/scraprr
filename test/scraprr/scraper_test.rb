@@ -15,8 +15,8 @@ describe Scraprr::Scraper do
 
       it "finds hash of attributes" do
         @scraper.
-          attribute(:name, :path => "Name").
-          attribute(:volume, :path => "Volume")
+          attribute(:name, "Name").
+          attribute(:volume, "Volume")
         result = @scraper.extract(@document)
         result[0].must_equal({ :name => "Beer1", :volume => "330ml" })
         result[1].must_equal({ :name => "Beer2", :volume => "500ml" })
@@ -26,8 +26,8 @@ describe Scraprr::Scraper do
 
       it "skips item when required attribute is empty" do
         @scraper.
-          attribute(:name, :path => "Name", :required => true).
-          attribute(:volume, :path => "Volume")
+          attribute(:name, "Name", :required => true).
+          attribute(:volume, "Volume")
         result = @scraper.extract(@document)
         result[0].must_equal({ :name => "Beer1", :volume => "330ml" })
         result[1].must_equal({ :name => "Beer2", :volume => "500ml" })
@@ -47,8 +47,8 @@ describe Scraprr::Scraper do
 
       it "finds hash of attributes" do
         @scraper.
-          attribute(:name, :path => './td[1]').
-          attribute(:price, :path => './td[2]')
+          attribute(:name, './td[1]').
+          attribute(:price, './td[2]')
         results = @scraper.extract(@document)
         results[0].must_equal({ :name => '', :price => '' })
         results[1].must_equal({ :name => 'Beer1 - 5%, 330ml', :price => '10.0' })

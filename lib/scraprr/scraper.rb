@@ -12,8 +12,8 @@ module Scraprr
       self
     end
 
-    def attribute(name, opts={})
-      @object_scraper.attribute(name, opts)
+    def attribute(name, path = AttributeScraper::DEFAULT_PATH, opts = {})
+      @object_scraper.attribute(name, path, opts)
       self
     end
 

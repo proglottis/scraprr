@@ -4,9 +4,11 @@ module Scraprr
   class AttributeScraper
     attr_reader :name, :path, :attr, :required, :html, :regexp, :strip
 
-    def initialize(name, opts = {})
+    DEFAULT_PATH = '.'
+
+    def initialize(name, path = DEFAULT_PATH, opts = {})
       @name = name
-      @path = opts[:path] || '.'
+      @path = path
       @attr = opts[:attr]
       @required = opts[:required]
       @html = opts[:html]
@@ -14,8 +16,7 @@ module Scraprr
       @strip = opts[:strip]
     end
 
-    def extract(node)
-      element = node.search(path)
+    def extract(element)
       if attr
         value = element.attr(attr).to_s
       else
