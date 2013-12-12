@@ -13,5 +13,13 @@ describe Scraprr::StripFilter do
       @chain = Scraprr::StripFilter.new(@chain)
       @chain.run(value).must_equal('test')
     end
+
+    it "returns nil if value was nil" do
+      value = nil
+      @chain.expect(:run, value, [value])
+
+      @chain = Scraprr::StripFilter.new(@chain)
+      @chain.run(value).must_equal(nil)
+    end
   end
 end

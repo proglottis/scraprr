@@ -5,7 +5,8 @@ module Scraprr
     end
 
     def run(value)
-      @chain.run(value).strip
+      value = @chain.run(value)
+      value.strip if value
     end
   end
 end
